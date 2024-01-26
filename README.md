@@ -4,11 +4,11 @@
 
 
 ## Usage
-
+```
 % curl -i -H "Content-Type: application/json" -X POST -d '{"original_file": "/Users/user/Downloads/audiofile.mp3"}' http://127.0.0.1:8080/invoke
+```
 
-
-
+```
 HTTP/1.0 200 OK
 
 Content-Type: application/json
@@ -18,9 +18,9 @@ Content-Length: 239
 Server: Werkzeug/2.0.1 Python/3.8.18
 
 Date: Thu, 25 Jan 2024 05:35:26 GMT
+```
 
-
-
+```
 {
 
   "output_files": [
@@ -34,3 +34,4 @@ Date: Thu, 25 Jan 2024 05:35:26 GMT
   "status": "success"
 
 }
+```
