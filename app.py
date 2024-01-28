@@ -1,20 +1,27 @@
 from flask import Flask, request, abort, jsonify
 from spleeter.separator import Separator
-import os, tempfile
+
+import logging
+import os
+import tempfile
 
 temp_dir = tempfile.gettempdir()
 app = Flask(__name__)
-
 
 @app.route('/invoke', methods=['POST'])
 def invoke():
     if not request.json or 'original_file' not in request.json:
         abort(400)
-   
-    original_file = request.json['original_file']
-    print(f"Processing {original_file}")
+  
+    payload = request.json 
+    original_file = payload['original_file']
+    logging.info(f"Processing {original_file}")
 
-    separator = Separator('spleeter:2stems')
+    separator_type = 'spleeter:2stems'
+    if 'split_type' in payload:
+        separator_type = payload['split_type']
+
+    separator = Separator(separator_type)
     separator.separate_to_file(original_file, temp_dir)
 
     original_file_short_name = original_file.split("/")[-1].split(".")[0]
