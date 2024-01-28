@@ -26,15 +26,15 @@ Date: Sun, 28 Jan 2024 08:27:40 GMT
 
   "output_files": [
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/accompaniment.wav", 
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/accompaniment.wav", 
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/drums.wav", 
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/drums.wav", 
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/vocals.wav", 
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/vocals.wav", 
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/other.wav", 
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/other.wav", 
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/bass.wav"
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/bass.wav"
 
   ], 
 
@@ -42,7 +42,4 @@ Date: Sun, 28 Jan 2024 08:27:40 GMT
 
 } 
 
-  "status": "success"
-
-}
 ```
