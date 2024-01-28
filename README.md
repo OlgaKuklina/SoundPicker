@@ -5,7 +5,7 @@
 
 ## Usage
 ```
-% curl -i -H "Content-Type: application/json" -X POST -d '{"original_file": "/Users/user/Downloads/audiofile.mp3"}' http://127.0.0.1:8080/invoke
+% % curl -i -H "Content-Type: application/json" -X POST -d '{"original_file": "/Users/user/Downloads/audiofile.mp3", "split_type": "spleeter:4stems"}' http://127.0.0.1:8080/invoke
 ```
 
 ```
@@ -13,11 +13,12 @@ HTTP/1.0 200 OK
 
 Content-Type: application/json
 
-Content-Length: 239
+Content-Length: 508
 
-Server: Werkzeug/2.0.1 Python/3.8.18
+Server: gunicorn
 
-Date: Thu, 25 Jan 2024 05:35:26 GMT
+Date: Sun, 28 Jan 2024 08:27:40 GMT
+
 ```
 
 ```
@@ -25,11 +26,21 @@ Date: Thu, 25 Jan 2024 05:35:26 GMT
 
   "output_files": [
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/accompaniment.wav", 
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/accompaniment.wav", 
 
-    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/audiofile/vocals.wav"
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/drums.wav", 
+
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/vocals.wav", 
+
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/other.wav", 
+
+    "/var/folders/27/qyx8gdrd3sq4420y2snx24k88yzvn1/T/josh-groban-broken-vow/bass.wav"
 
   ], 
+
+  "status": "success"
+
+} 
 
   "status": "success"
 
