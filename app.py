@@ -1,12 +1,44 @@
 from flask import Flask, request, abort, jsonify
-from spleeter.separator import Separator
 
 import logging
 import os
 import tempfile
+import uuid
+import zmq
 
-temp_dir = tempfile.gettempdir()
 app = Flask(__name__)
+
+logging.basicConfig()
+log = logging.getLogger("soundpicker-api")
+log.setLevel(logging.INFO)
+
+log.info("Initializing message publisher...")
+global zmq_context
+zmq_context = zmq.Context()
+zmq_socket = zmq_context.socket(zmq.PUSH)
+zmq_socket.connect("tcp://127.0.0.1:5555")
+log.info("Message publisher ready")
+
+temp_root = tempfile.gettempdir()
+
+@app.route('/status/<request_id>', methods=['GET'])
+def status(request_id):
+    log.info(f"Checking request: {request_id}")
+    target_dir = f"{temp_root}/{request_id}"
+    if not os.path.isdir(target_dir):
+        abort(404)
+
+    files = os.listdir(target_dir)
+    if not 'SUCCESS' in files:
+        return jsonify({'request_id': request_id, 'status': 'in_progress'})
+
+    files.remove('SUCCESS')
+    target_dir = f"{target_dir}/{files[0]}"
+    file_paths = []
+    for f in os.listdir(target_dir):
+        file_paths.append(f"{target_dir}/{f}")
+    
+    return jsonify({'request_id': request_id, 'status': 'success', 'output_files': file_paths})
 
 @app.route('/invoke', methods=['POST'])
 def invoke():
@@ -15,25 +47,25 @@ def invoke():
   
     payload = request.json 
     original_file = payload['original_file']
-    logging.info(f"Processing {original_file}")
 
     separator_type = 'spleeter:2stems'
     if 'split_type' in payload:
         separator_type = payload['split_type']
 
-    separator = Separator(separator_type)
-    separator.separate_to_file(original_file, temp_dir)
+    if not separator_type in ['spleeter:2stems', 'spleeter:4stems', 'spleeter:5stems']:
+        abort(400)
+  
+    request_id = str(uuid.uuid4())
+    target_dir = f"{temp_root}/{request_id}" 
+    os.mkdir(target_dir)   
 
-    original_file_short_name = original_file.split("/")[-1].split(".")[0]
-    output_dir = f"{temp_dir}/{original_file_short_name}"
-    files = os.listdir(output_dir)
-    file_paths = []
-    for f in files:
-        file_paths.append(f"{output_dir}/{f}")
-   
-    return jsonify({'status': 'success', 'output_files': file_paths})
+    zmq_message = { 'source_file': original_file, 'split_type': separator_type, 'request_id': request_id, 'target_dir': target_dir }
+    zmq_socket.send_json(zmq_message)
+
+    return jsonify({'request_id': request_id})
 
 
 if __name__ == '__main__':
+    log.info("Starting REST API...")
     app.run(host='127.0.0.1', port=8080, debug=True)
 
