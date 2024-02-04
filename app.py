@@ -19,12 +19,14 @@ zmq_socket = zmq_context.socket(zmq.PUSH)
 zmq_socket.connect("tcp://127.0.0.1:5555")
 log.info("Message publisher ready")
 
-temp_root = tempfile.gettempdir()
+input_dir = '/Users/okuklina/soundpicker_files/input'
+output_dir = '/Users/okuklina/soundpicker_files/artifacts'
+artifact_base_url = "http://127.0.0.1:8888/artifacts"
 
 @app.route('/status/<request_id>', methods=['GET'])
 def status(request_id):
     log.info(f"Checking request: {request_id}")
-    target_dir = f"{temp_root}/{request_id}"
+    target_dir = os.path.join(output_dir, request_id)
     if not os.path.isdir(target_dir):
         abort(404)
 
@@ -33,20 +35,25 @@ def status(request_id):
         return jsonify({'request_id': request_id, 'status': 'in_progress'})
 
     files.remove('SUCCESS')
-    target_dir = f"{target_dir}/{files[0]}"
-    file_paths = []
+    target_dir = os.path.join(target_dir, files[0])
+    file_urls = []
     for f in os.listdir(target_dir):
-        file_paths.append(f"{target_dir}/{f}")
+        file_urls.append(f"{artifact_base_url}/{request_id}/{files[0]}/{f}")
     
-    return jsonify({'request_id': request_id, 'status': 'success', 'output_files': file_paths})
+    return jsonify({'request_id': request_id, 'status': 'success', 'output_artifacts': file_urls})
+
 
 @app.route('/invoke', methods=['POST'])
 def invoke():
-    if not request.json or 'original_file' not in request.json:
+    if not request.json or 'source_id' not in request.json:
         abort(400)
   
     payload = request.json 
-    original_file = payload['original_file']
+    source_dir = os.path.join(input_dir, payload['source_id'])
+    if not os.path.isdir(source_dir):
+        abort(404)
+
+    source_file = os.listdir(source_dir)[0]
 
     separator_type = 'spleeter:2stems'
     if 'split_type' in payload:
@@ -56,13 +63,29 @@ def invoke():
         abort(400)
   
     request_id = str(uuid.uuid4())
-    target_dir = f"{temp_root}/{request_id}" 
+    target_dir = os.path.join(output_dir, request_id)
     os.mkdir(target_dir)   
 
-    zmq_message = { 'source_file': original_file, 'split_type': separator_type, 'request_id': request_id, 'target_dir': target_dir }
+    zmq_message = { 'source_file': os.path.join(source_dir, source_file), 'split_type': separator_type, 'request_id': request_id, 'target_dir': target_dir }
     zmq_socket.send_json(zmq_message)
 
     return jsonify({'request_id': request_id})
+
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if not 'source_file' in request.files:
+       abort(400)
+    f = request.files['source_file']
+
+    file_id = str(uuid.uuid4())
+    target_dir = os.path.join(input_dir, file_id)
+    os.mkdir(target_dir)
+
+    filepath = os.path.join(target_dir, f.filename)
+    log.info(f"Saving to {filepath}")
+    f.save(filepath)
+    return jsonify({'source_id': file_id})
 
 
 if __name__ == '__main__':
